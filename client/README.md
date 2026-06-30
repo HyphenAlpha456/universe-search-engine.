@@ -1,16 +1,80 @@
-# React + Vite
+# Universe Search Engine 🌌
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)]()
+[![Node Version](https://img.shields.io/badge/Node-v18%2B-green)]()
 
-Currently, two official plugins are available:
+A high-throughput, distributed data platform engineered to backfill, stream, and index millions of developer issues from GitHub and Stack Overflow. This project is a demonstration of large-scale systems engineering, event-driven architecture, and scalable full-text search.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🏗️ System Architecture
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The system is built as a decoupled, event-driven microservices ecosystem. It ensures fault tolerance and low latency by separating ingestion, buffering, and storage tiers.
 
-## Expanding the Oxlint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+
+## 🛠 Tech Stack
+
+* **Ingestion:** Node.js, Axios, REST API
+* **Message Broker:** Apache Kafka (Event streaming & buffering)
+* **Search Engine:** Elasticsearch (Lucene-based full-text indexing)
+* **Frontend:** React.js, Redux Toolkit, Vite
+* **Infrastructure:** Docker, Docker Compose
+
+## 💡 Key Engineering Challenges Solved
+
+* **Rate-Limit Resilience:** Implemented a **Recursive Divide & Conquer algorithm** for GitHub to bisect time-windows and bypass the 1,000-result pagination wall, ensuring 100% data capture.
+* **Backpressure Handling:** Utilized Kafka partitions and `eachBatch` processing to buffer high-velocity API data, protecting the database layer from traffic spikes.
+* **Fault Tolerance:** Engineered a **Dead Letter Queue (DLQ)** to isolate malformed payloads, ensuring the main pipeline continues running without human intervention.
+* **Resource Optimization:** Maintained an $O(1)$ heap memory footprint during high-volume indexing using stream-based batch processing.
+
+## 📁 Repository Structure
+
+```text
+DEV-SEARCH-ENGINE/
+├── api/             # Express.js proxy for secure ES querying
+├── client/          # React + Redux frontend
+├── config/          # Kafka cluster configurations
+├── scripts/         # Setup automation
+├── workers/         # Kafka Consumers (Indexer) & Producers (Ingestors)
+├── docker-compose.yml
+└── .gitignore
+📦 Getting Started
+1. Prerequisites
+Docker & Docker Desktop installed.
+
+Node.js (v18+) installed.
+
+2. Startup Sequence
+Spin up Infrastructure:
+
+Bash
+docker-compose up -d
+Initialize Kafka Topics:
+
+Bash
+node scripts/setup.js
+Start the Indexer (Consumer):
+
+Bash
+node workers/indexer/index.js
+Start the Ingestion Fleet:
+
+Bash
+node workers/ingestion/github.js
+node workers/ingestion/stackoverflow.js
+Start API Proxy & Frontend:
+
+Bash
+# In a new terminal
+cd api && node server.js
+
+# In another terminal
+cd client && npm run dev
+👨‍💻 Author
+Agnimitra Sasaru
+
+GitHub Profile
+
+LinkedIn
