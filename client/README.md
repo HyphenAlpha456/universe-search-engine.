@@ -40,38 +40,115 @@ DEV-SEARCH-ENGINE/
 ├── workers/         # Kafka Consumers (Indexer) & Producers (Ingestors)
 ├── docker-compose.yml
 └── .gitignore
-📦 Getting Started
-1. Prerequisites
-Docker & Docker Desktop installed.
+# 📦 Getting Started
 
-Node.js (v18+) installed.
+## 1. Prerequisites
 
-2. Startup Sequence
-Spin up Infrastructure:
+Before running the project, make sure you have the following installed:
 
-Bash
+- Docker & Docker Desktop
+- Node.js (v18 or later)
+
+---
+
+## 2. Startup Sequence
+
+Follow the steps below in the given order.
+
+### Step 1: Spin Up the Infrastructure
+
+```bash
 docker-compose up -d
-Initialize Kafka Topics:
+```
 
-Bash
+This starts all required services (Kafka, Zookeeper, Elasticsearch, etc.) in the background.
+
+---
+
+### Step 2: Initialize Kafka Topics
+
+```bash
 node scripts/setup.js
-Start the Indexer (Consumer):
+```
 
-Bash
+This creates all the required Kafka topics for the application.
+
+---
+
+### Step 3: Start the Indexer (Kafka Consumer)
+
+```bash
 node workers/indexer/index.js
-Start the Ingestion Fleet:
+```
 
-Bash
+The indexer consumes messages from Kafka and indexes them into Elasticsearch.
+
+---
+
+### Step 4: Start the Ingestion Workers
+
+Run each worker in a separate terminal.
+
+#### GitHub Ingestion Worker
+
+```bash
 node workers/ingestion/github.js
+```
+
+#### Stack Overflow Ingestion Worker
+
+```bash
 node workers/ingestion/stackoverflow.js
-Start API Proxy & Frontend:
+```
 
-Bash
-# In a new terminal
-cd api && node server.js
+These workers continuously fetch data and publish it to Kafka.
 
-# In another terminal
-cd client && npm run dev
+---
+
+### Step 5: Start the API Server
+
+Open a new terminal and run:
+
+```bash
+cd api
+node server.js
+```
+
+The API server provides endpoints for the frontend.
+
+---
+
+### Step 6: Start the Frontend
+
+Open another terminal and run:
+
+```bash
+cd client
+npm run dev
+```
+
+This starts the development server for the frontend application.
+
+---
+
+## 🚀 Project Startup Order
+
+```text
+1. docker-compose up -d
+        ↓
+2. node scripts/setup.js
+        ↓
+3. node workers/indexer/index.js
+        ↓
+4. node workers/ingestion/github.js
+5. node workers/ingestion/stackoverflow.js
+        ↓
+6. cd api && node server.js
+        ↓
+7. cd client && npm run dev
+```
+
+Once all services are running successfully, open the frontend in your browser and start using the application.
 👨‍💻 Author
 Agnimitra Sasaru
 
