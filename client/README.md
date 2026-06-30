@@ -4,154 +4,213 @@
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)]()
 [![Node Version](https://img.shields.io/badge/Node-v18%2B-green)]()
 
-A high-throughput, distributed data platform engineered to backfill, stream, and index millions of developer issues from GitHub and Stack Overflow. This project is a demonstration of large-scale systems engineering, event-driven architecture, and scalable full-text search.
+A high-throughput, distributed data platform engineered to backfill, stream, and index millions of developer issues from GitHub and Stack Overflow. This project demonstrates large-scale systems engineering, event-driven architecture, distributed messaging, and scalable full-text search.
 
 ---
 
-## 🏗️ System Architecture
+# 🏗️ System Architecture
 
-The system is built as a decoupled, event-driven microservices ecosystem. It ensures fault tolerance and low latency by separating ingestion, buffering, and storage tiers.
+The system is designed as a decoupled, event-driven microservices architecture where ingestion, messaging, indexing, and querying are isolated into independent services for scalability and fault tolerance.
 
+> *(Add your architecture diagram here)*
 
+---
 
-## 🛠 Tech Stack
+# 🛠 Tech Stack
 
-* **Ingestion:** Node.js, Axios, REST API
-* **Message Broker:** Apache Kafka (Event streaming & buffering)
-* **Search Engine:** Elasticsearch (Lucene-based full-text indexing)
-* **Frontend:** React.js, Redux Toolkit, Vite
-* **Infrastructure:** Docker, Docker Compose
+| Layer | Technology |
+|--------|------------|
+| Backend | Node.js, Express.js |
+| Data Ingestion | Axios, REST APIs |
+| Event Streaming | Apache Kafka |
+| Search Engine | Elasticsearch |
+| Frontend | React.js, Redux Toolkit, Vite |
+| Infrastructure | Docker, Docker Compose |
 
-## 💡 Key Engineering Challenges Solved
+---
 
-* **Rate-Limit Resilience:** Implemented a **Recursive Divide & Conquer algorithm** for GitHub to bisect time-windows and bypass the 1,000-result pagination wall, ensuring 100% data capture.
-* **Backpressure Handling:** Utilized Kafka partitions and `eachBatch` processing to buffer high-velocity API data, protecting the database layer from traffic spikes.
-* **Fault Tolerance:** Engineered a **Dead Letter Queue (DLQ)** to isolate malformed payloads, ensuring the main pipeline continues running without human intervention.
-* **Resource Optimization:** Maintained an $O(1)$ heap memory footprint during high-volume indexing using stream-based batch processing.
+# 💡 Key Engineering Challenges Solved
 
-## 📁 Repository Structure
+### 🚀 Rate-Limit Resilience
+
+Implemented a **Recursive Divide & Conquer** strategy to bypass GitHub's 1000-result pagination limit by recursively splitting time windows until every issue is retrieved.
+
+### ⚡ Backpressure Handling
+
+Used Kafka partitions and `eachBatch` consumers to decouple ingestion from indexing, allowing the system to absorb sudden traffic spikes.
+
+### 🛡 Fault Tolerance
+
+Designed a **Dead Letter Queue (DLQ)** that automatically redirects malformed events without interrupting the indexing pipeline.
+
+### 📦 Memory Optimization
+
+Maintained an **O(1)** heap memory footprint using streaming batch processing during Elasticsearch indexing.
+
+---
+
+# 📁 Repository Structure
 
 ```text
 DEV-SEARCH-ENGINE/
-├── api/             # Express.js proxy for secure ES querying
-├── client/          # React + Redux frontend
-├── config/          # Kafka cluster configurations
-├── scripts/         # Setup automation
-├── workers/         # Kafka Consumers (Indexer) & Producers (Ingestors)
+│
+├── api/                     # Express API proxy
+├── client/                  # React frontend
+├── config/                  # Kafka configuration
+├── scripts/                 # Setup scripts
+├── workers/
+│   ├── ingestion/
+│   │   ├── github.js
+│   │   └── stackoverflow.js
+│   │
+│   └── indexer/
+│       └── index.js
+│
 ├── docker-compose.yml
-└── .gitignore
+├── package.json
+└── README.md
+```
+
+---
+
 # 📦 Getting Started
 
-## 1. Prerequisites
+## Prerequisites
 
-Before running the project, make sure you have the following installed:
+Install the following before starting the project:
 
-- Docker & Docker Desktop
+- Docker
+- Docker Desktop
 - Node.js (v18 or later)
 
 ---
 
-## 2. Startup Sequence
+## Startup Sequence
 
-Follow the steps below in the given order.
-
-### Step 1: Spin Up the Infrastructure
+### 1. Start Infrastructure
 
 ```bash
 docker-compose up -d
 ```
 
-This starts all required services (Kafka, Zookeeper, Elasticsearch, etc.) in the background.
+Starts Kafka, Zookeeper, Elasticsearch, and all required infrastructure.
 
 ---
 
-### Step 2: Initialize Kafka Topics
+### 2. Create Kafka Topics
 
 ```bash
 node scripts/setup.js
 ```
 
-This creates all the required Kafka topics for the application.
+Initializes all Kafka topics used by the application.
 
 ---
 
-### Step 3: Start the Indexer (Kafka Consumer)
+### 3. Start the Elasticsearch Indexer
 
 ```bash
 node workers/indexer/index.js
 ```
 
-The indexer consumes messages from Kafka and indexes them into Elasticsearch.
+Consumes Kafka events and indexes them into Elasticsearch.
 
 ---
 
-### Step 4: Start the Ingestion Workers
-
-Run each worker in a separate terminal.
-
-#### GitHub Ingestion Worker
+### 4. Start GitHub Ingestion Worker
 
 ```bash
 node workers/ingestion/github.js
 ```
 
-#### Stack Overflow Ingestion Worker
+Fetches GitHub issues and publishes them to Kafka.
+
+---
+
+### 5. Start Stack Overflow Ingestion Worker
 
 ```bash
 node workers/ingestion/stackoverflow.js
 ```
 
-These workers continuously fetch data and publish it to Kafka.
+Fetches Stack Overflow questions and publishes them to Kafka.
 
 ---
 
-### Step 5: Start the API Server
+### 6. Start the API Server
 
-Open a new terminal and run:
+Open another terminal.
 
 ```bash
 cd api
 node server.js
 ```
 
-The API server provides endpoints for the frontend.
+Runs the Express API.
 
 ---
 
-### Step 6: Start the Frontend
+### 7. Start the Frontend
 
-Open another terminal and run:
+Open another terminal.
 
 ```bash
 cd client
 npm run dev
 ```
 
-This starts the development server for the frontend application.
+Starts the React application.
 
 ---
 
-## 🚀 Project Startup Order
+# 🚀 Startup Flow
 
 ```text
-1. docker-compose up -d
-        ↓
-2. node scripts/setup.js
-        ↓
-3. node workers/indexer/index.js
-        ↓
-4. node workers/ingestion/github.js
-5. node workers/ingestion/stackoverflow.js
-        ↓
-6. cd api && node server.js
-        ↓
-7. cd client && npm run dev
+docker-compose up -d
+        │
+        ▼
+node scripts/setup.js
+        │
+        ▼
+node workers/indexer/index.js
+        │
+        ▼
+node workers/ingestion/github.js
+
+node workers/ingestion/stackoverflow.js
+        │
+        ▼
+cd api && node server.js
+        │
+        ▼
+cd client && npm run dev
 ```
 
-Once all services are running successfully, open the frontend in your browser and start using the application.
-👨‍💻 Author
-Agnimitra Sasaru
+---
 
-GitHub Profile
+# ✨ Features
 
-LinkedIn
+- High-throughput data ingestion
+- Distributed event-driven architecture
+- Recursive GitHub crawler
+- Kafka-based buffering
+- Elasticsearch full-text search
+- Dead Letter Queue (DLQ)
+- Fault-tolerant indexing
+- React + Redux frontend
+- Dockerized deployment
+
+---
+
+# 👨‍💻 Author
+
+**Agnimitra Sasaru**
+
+- GitHub: https://github.com/<HyphenAlpha456>
+- LinkedIn: https://linkedin.com/in/<agnimitra-sasaru-097974274>
+
+---
+
+# 📄 License
+
+This project is licensed under the **MIT License**.
