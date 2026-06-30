@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # =========================================================================
+  # KAFKA BROKER (The Universal Shock Absorber)
+  # =========================================================================
+  kafka:
+    image: apache/kafka:latest
+    container_name: search_engine_kafka
+    ports:
+      - "9092:9092" # Exposes Kafka to our Node.js ingestors and indexers
+    environment:
+      # KRaft Mode: Operating as a single-node Controller and Broker
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://localhost:9092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@localhost:9093'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      
+      # Storage Physics: Optimized for massive API data dumps
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824 # 1GB rollover to prevent fragmentation
+      KAFKA_LOG_RETENTION_HOURS: 168      # 7 days of retention for the Dead Letter Queue safety net
+
+  # =========================================================================
+  # ELASTICSEARCH (The Universal Search Index)
+  # =========================================================================
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    container_name: search_engine_elasticsearch
+    ports:
+      - "9200:9200" # Exposes the REST API for the Bulk Ingestion Worker
+    environment:
+      - discovery.type=single-node   # Local development optimization
+      - xpack.security.enabled=false # Disables TLS/Auth for maximum ingestion speed
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # Strict 512MB RAM limit to protect your host machine

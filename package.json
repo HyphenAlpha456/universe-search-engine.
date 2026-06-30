@@ -1,0 +1,31 @@
+{
+  "name": "deep-tech-search-engine",
+  "version": "2.0.0",
+  "description": "Distributed web crawler and search engine indexing pipeline driven by Apache Kafka.",
+  "type": "commonjs",
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "bootstrap": "node scripts/bootstrap.js",
+    "start:crawler": "node workers/crawler/index.js",
+    "start:indexer": "node workers/indexer/index.js",
+    "dev:crawler": "nodemon workers/crawler/index.js",
+    "dev:indexer": "nodemon workers/indexer/index.js"
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^8.19.1",
+    "axios": "^1.6.7",
+    "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "kafkajs": "^2.2.4",
+    "redis": "^4.6.13"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Agnimitra Sasaru",
+  "license": "ISC"
+}
